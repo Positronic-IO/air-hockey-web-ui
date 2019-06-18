@@ -16,7 +16,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('dist'))
 
-// viewed at http://localhost:8080
 app.get('/', function (req, res) {
     res.sendFile(path.join(__dirname + '/index.html'));
 });
@@ -40,6 +39,10 @@ io.on('connection', function (socket) {
 });
 
 sub.on("message", function (channel, message) {
+
+    let scoresRes = redisClient.get("scores", (err, scoresState) => {
+        io.emit("scores-change", JSON.parse(scoresState));
+    });
 
     let puckRes = redisClient.get("puck", (err, puckState) => {
         let puck = JSON.parse(puckState).location;

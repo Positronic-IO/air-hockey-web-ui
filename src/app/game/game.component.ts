@@ -25,10 +25,13 @@ export class GameComponent implements OnInit {
     // tell the browser we're handling this mouse event
     event.preventDefault();
     event.stopPropagation();
-    
+
     let x = Math.floor((event.clientX - this.boardOffsetX) * this.scaleX);
     let y = event.clientY - this.boardOffsetY;
-    this.moveOpponent(x, y)
+
+    if (this.humanPlay) {
+      this.moveOpponent(x, y)
+    }
   }
 
   public canvas: ElementRef<HTMLCanvasElement>;
@@ -66,7 +69,7 @@ export class GameComponent implements OnInit {
     this.boardOffsetY = boardBound.top;
 
     this.scaleX = this.boardWidth / boardBound.width,    // relationship bitmap vs. element for X
-    this.scaleY = this.boardWidth  / boardBound.height;
+      this.scaleY = this.boardWidth / boardBound.height;
 
     // Set width & height for canvas
     this.board.width = this.boardWidth;
@@ -95,7 +98,11 @@ export class GameComponent implements OnInit {
     this.controllerTwo.startingPosY = this.puck.startingPosY;
     this.controllerTwo.x = this.controllerTwo.startingPosX;
     this.controllerTwo.y = this.controllerTwo.startingPosY
-    
+
+    // Init scores
+    this.robotScore = 0;
+    this.opponentScore = 0;
+
     this.humanPlay = true;
 
     this.onLoad();
@@ -108,10 +115,6 @@ export class GameComponent implements OnInit {
     this.socket = socketIo(SERVER_URL, {
       transports: ['websocket']
     });
-  }
-
-  send(message: any): void {
-    this.socket.emit('message', message);
   }
 
   onMessage(): Observable<any> {
@@ -137,8 +140,11 @@ export class GameComponent implements OnInit {
 
     // Set focus to canvas so keyboard events work
     this.board.focus()
-
   };
+
+  humanToggle() {
+    this.humanPlay = !this.humanPlay;
+  }
 
   clearCanvas(): void {
     this.boardContext.clearRect(0, 0, this.boardWidth, this.boardHeight);
@@ -161,6 +167,12 @@ export class GameComponent implements OnInit {
   updateGame() {
 
     this.clearCanvas()
+
+    // Collect Scores
+    this.socket.on("scores-change", (msg: any) => {
+      this.robotScore = msg.robot_score;
+      this.opponentScore = msg.opponent_score;
+    });
 
     // Draw & contain puck
     this.socket.on("state-change", (msg: any) => {
@@ -186,7 +198,7 @@ export class GameComponent implements OnInit {
   };
 
   // Mouse events
-  moveOpponent(x: number, y: number) { 
+  moveOpponent(x: number, y: number) {
     this.controllerTwo.x = x;
     this.controllerTwo.y = y;
     this.draw(this.controllerTwo);

@@ -15,5 +15,38 @@
             </div>
         </div>
         <canvas id="canvas" class="table table--canvas" tabindex="0"></canvas>
+        <div class="col-lg-2 col-md-2 col-sm-2">
+            <div class="card card-stats">
+                <div class="card-header card-header-success card-header-icon">
+                    <p class="card-category">Robot Score</p>
+                    <h3 class="card-title">{{ robotScore }}</h3>
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-2">
+            <div class="card card-stats">
+                <div class="card-header card-header-danger card-header-icon">
+                    <p class="card-category">Opponent Score</p>
+                    <h3 class="card-title"> {{ opponentScore }} </h3>
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-2">
+            <div class="card card-stats">
+                <div class="card-header card-header-danger card-header-icon">
+                    <p class="card-category">Viewing Mode</p>
+                    <h3 *ngIf="humanPlay" class="card-title">Playing mode</h3>
+                    <h3 *ngIf="(!humanPlay)" class="card-title">Viewing mode</h3>
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+            <button mat-raised-button class="navbar-toggler" type="button" (click)="humanToggle()">Change mode
+            </button>
+        </div>
     </div>
 </div>
