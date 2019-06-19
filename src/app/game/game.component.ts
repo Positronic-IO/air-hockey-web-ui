@@ -6,12 +6,6 @@ import * as socketIo from 'socket.io-client';
 
 const SERVER_URL = 'http://localhost:5001';
 
-export enum KEY_CODE {
-  UP_ARROW = 38,
-  DOWN_ARROW = 40,
-  RIGHT_ARROW = 39,
-  LEFT_ARROW = 37
-}
 
 @Component({
   selector: 'app-game',
@@ -103,7 +97,8 @@ export class GameComponent implements OnInit {
     this.robotScore = 0;
     this.opponentScore = 0;
 
-    this.humanPlay = true;
+    // Default mode
+    this.humanPlay = false;
 
     this.onLoad();
 
