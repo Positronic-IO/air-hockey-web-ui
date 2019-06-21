@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors')
 const socketio = require('socket.io');
-const port = 5001
+const port = 8888
 
 const Redis = require('redis');
 const redis = Redis.createClient();
