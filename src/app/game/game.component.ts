@@ -1,16 +1,14 @@
 import { Component, ViewChild, ElementRef, OnInit, HostListener } from '@angular/core';
 import { Disc } from '../shared/models/disc.model';
-import { Observable } from 'rxjs/Observable';
-import { Observer } from 'rxjs/Observer';
-import * as socketIo from 'socket.io-client';
-
-const SERVER_URL = 'http://localhost:5001';
+import { SocketService } from '../services/socket.service';
+import { environment } from '../../environments/environment';
 
 
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
-  styleUrls: ['./game.component.css']
+  styleUrls: ['./game.component.css'],
+  providers: [SocketService]
 })
 export class GameComponent implements OnInit {
 
@@ -28,6 +26,8 @@ export class GameComponent implements OnInit {
     }
   }
 
+  constructor(private _socket: SocketService) { }
+
   public canvas: ElementRef<HTMLCanvasElement>;
 
   public puck: Disc = new Disc();
@@ -36,7 +36,6 @@ export class GameComponent implements OnInit {
   public boardWidth: number;
   public boardHeight: number;
   public board: any;
-  public socket: any;
   public boardContext: any;
   public robotScore: number;
   public opponentScore: number;
@@ -106,28 +105,10 @@ export class GameComponent implements OnInit {
 
   }
 
-  initSocket(): void {
-    this.socket = socketIo(SERVER_URL, {
-      transports: ['websocket']
-    });
-  }
-
-  onMessage(): Observable<any> {
-    return new Observable<any>(observer => {
-      this.socket.on('state-change', (data: any) => observer.next(data));
-    });
-  }
-
-  onEvent(event: any): Observable<any> {
-    return new Observable<any>(observer => {
-      this.socket.on(event, () => observer.next());
-    })
-  };
-
   onLoad(): void {
     // Load things
-    this.initSocket();
-    this.onEvent("connect")
+    this._socket.initSocket();
+    this._socket.onEvent("connect")
       .subscribe(() => {
         console.log('Websockets enabled.');
       });
@@ -164,13 +145,13 @@ export class GameComponent implements OnInit {
     this.clearCanvas()
 
     // Collect Scores
-    this.socket.on("scores-change", (msg: any) => {
+    this._socket.onMessage("scores-change").subscribe((msg: any) => {
       this.robotScore = msg.robot_score;
       this.opponentScore = msg.opponent_score;
     });
 
     // Draw & contain puck
-    this.socket.on("state-change", (msg: any) => {
+    this._socket.onMessage("state-change").subscribe((msg: any) => {
       this.puck.x = msg.puck[0];
       this.puck.y = msg.puck[1];
       this.controller.x = msg.robot[0];
@@ -201,8 +182,8 @@ export class GameComponent implements OnInit {
   }
 
   setOpponentStatePosition() {
-    let ENDPOINT = SERVER_URL + '/api/opponent-move';
-    fetch(ENDPOINT,
+    let endpoint = environment.apiUrl + '/api/opponent-move';
+    fetch(endpoint,
       {
         body: JSON.stringify({
           x: this.controllerTwo.x,

@@ -1,26 +1,24 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { Observer } from 'rxjs/Observer';
+import { environment } from '../../environments/environment';
 
 import * as socketIo from 'socket.io-client';
-
-const SERVER_URL = 'http://localhost:8080';
 
 @Injectable()
 export class SocketService {
     private socket;
 
     public initSocket(): void {
-        this.socket = socketIo(SERVER_URL);
+        this.socket = socketIo(environment.socketURL);
     }
 
     public send(message: any): void {
         this.socket.emit('message', message);
     }
 
-    public onMessage(): Observable<any> {
+    public onMessage(channel: string): Observable<any> {
         return new Observable<any>(observer => {
-            this.socket.on('state-chnage', (data: any) => observer.next(data));
+            this.socket.on(channel, (data: any) => observer.next(data));
         });
     }
 
