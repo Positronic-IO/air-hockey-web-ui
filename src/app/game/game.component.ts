@@ -44,6 +44,9 @@ export class GameComponent implements OnInit {
   public boardOffsetY: number;
   public scaleX: number;
   public scaleY: number;
+  public robotCheckpoint: number;
+  public opponentCheckpoint: number;
+  public init: boolean;
 
 
   ngOnInit() {
@@ -113,6 +116,16 @@ export class GameComponent implements OnInit {
         console.log('Websockets enabled.');
       });
 
+    // Checkpoint timesteps
+    this._socket.onMessage("save-checkpoint").subscribe((msg: any) => {
+      this.init = false;
+      if (msg == "robot") {
+        this.robotCheckpoint = Date.now()
+      }
+      if (msg == "opponent") {
+        this.opponentCheckpoint = Date.now()
+      }
+    });
 
     // Set focus to canvas so keyboard events work
     this.board.focus()

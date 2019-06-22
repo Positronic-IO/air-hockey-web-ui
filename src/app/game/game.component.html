@@ -22,6 +22,8 @@
                     <h3 class="card-title">{{ robotScore }}</h3>
                 </div>
                 <div class="card-footer">
+                    <p *ngIf="(!humanPlay) && (!init)" class="card-category"> Last save at:
+                        {{ robotCheckpoint | date:'HH:mm:ss' }} </p>
                 </div>
             </div>
         </div>
@@ -32,6 +34,8 @@
                     <h3 class="card-title"> {{ opponentScore }} </h3>
                 </div>
                 <div class="card-footer">
+                    <p *ngIf="(!humanPlay) && (!init)" class="card-category"> Last save at:
+                        {{ opponentCheckpoint | date:'HH:mm:ss' }} </p>
                 </div>
             </div>
         </div>

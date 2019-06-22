@@ -9,6 +9,8 @@ const Redis = require('redis');
 const redis = Redis.createClient();
 const positionSub = Redis.createClient();
 const scoreSub = Redis.createClient();
+const checkpointSub = Redis.createClient();
+
 
 const path = require('path');
 
@@ -63,4 +65,10 @@ scoreSub.on("message", (channel, message) => {
         io.emit("scores-change", JSON.parse(resp));
     });
 
+});
+
+// Update Checkpoint
+checkpointSub.subscribe("save-checkpoint");
+checkpointSub.on("message", (channel, message) => {
+    io.emit("save-checkpoint", JSON.parse(message));
 });
