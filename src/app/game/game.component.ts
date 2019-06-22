@@ -48,13 +48,26 @@ export class GameComponent implements OnInit {
   public opponentCheckpoint: number;
   public init: boolean;
 
+  @HostListener('mousemove', ['$event'])
+  handleMouseEvent(event) {
+    // Tell the browser we're handling this mouse event
+    event.preventDefault();
+    event.stopPropagation();
+
+    let x = Math.floor((event.clientX - this.boardOffsetX) * this.scaleX);
+    let y = Math.floor((event.clientY - this.boardOffsetY) * this.scaleY);
+
+    if (this.humanPlay) {
+      this.moveOpponent(x, y)
+    }
+  }
 
   ngOnInit() {
 
+    // Board
     this.board = <HTMLCanvasElement>document.getElementById("canvas");
     this.boardContext = this.board.getContext('2d');
 
-    // board
     this.boardWidth = 900;
     this.boardHeight = 480;
     const boardCenterX = Math.round(this.boardWidth / 2);
@@ -64,12 +77,15 @@ export class GameComponent implements OnInit {
     this.boardOffsetX = boardBound.left;
     this.boardOffsetY = boardBound.top;
 
-    this.scaleX = this.boardWidth / boardBound.width,    // relationship bitmap vs. element for X
-      this.scaleY = this.boardWidth / boardBound.height;
+    this.scaleX = this.boardWidth / boardBound.width;    // relationship bitmap vs. element for X
+    this.scaleY = this.boardHeight / boardBound.height;
 
     // Set width & height for canvas
     this.board.width = this.boardWidth;
     this.board.height = this.boardHeight;
+
+    // Set focus to canvas so keyboard events work
+    this.board.focus();
 
     // Puck
     this.puck.startingPosX = boardCenterX;
