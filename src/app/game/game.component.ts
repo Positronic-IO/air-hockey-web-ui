@@ -123,6 +123,7 @@ export class GameComponent implements OnInit {
     // Checkpoint timesteps
     this._socket.onMessage("save-checkpoint").subscribe((msg: any) => {
       this.init = false;
+      msg = JSON.parse(msg);
       if (msg == "robot") {
         this.robotCheckpoint = Date.now()
       }
