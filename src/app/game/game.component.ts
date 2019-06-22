@@ -95,20 +95,23 @@ export class GameComponent implements OnInit {
     this.controllerTwo.x = this.controllerTwo.startingPosX;
     this.controllerTwo.y = this.controllerTwo.startingPosY
 
-    // Init scores
+    // Init
     this.robotScore = 0;
     this.opponentScore = 0;
+    this.init = true;
 
     // Default mode
     this.humanPlay = false;
 
-    this.onLoad();
+    // Start socket subscriptions
+    this.startSocket();
 
+    // Game loop
     this.updateGame();
 
   }
 
-  onLoad(): void {
+  startSocket(): void {
     // Load things
     this._socket.initSocket();
     this._socket.onEvent("connect")
@@ -127,11 +130,29 @@ export class GameComponent implements OnInit {
       }
     });
 
-    // Set focus to canvas so keyboard events work
-    this.board.focus()
+    // Collect Scores
+    this._socket.onMessage("scores-change").subscribe((msg: any) => {
+      this.robotScore = msg.robot_score;
+      this.opponentScore = msg.opponent_score;
+    });
+
+    // Draw & contain puck
+    this._socket.onMessage("state-change").subscribe((msg: any) => {
+      this.puck.x = msg.puck[0];
+      this.puck.y = msg.puck[1];
+      this.controller.x = msg.robot[0];
+      this.controller.y = msg.robot[1];
+
+      if (!this.humanPlay) {
+        this.controllerTwo.x = msg.opponent[0];
+        this.controllerTwo.y = msg.opponent[1];
+      }
+
+    });
+
   };
 
-  humanToggle() {
+  humanToggle(): void {
     this.humanPlay = !this.humanPlay;
   }
 
