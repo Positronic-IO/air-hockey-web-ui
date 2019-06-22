@@ -70,5 +70,5 @@ scoreSub.on("message", (channel, message) => {
 // Update Checkpoint
 checkpointSub.subscribe("save-checkpoint");
 checkpointSub.on("message", (channel, message) => {
-    io.emit("save-checkpoint", JSON.parse(message));
+    io.emit("save-checkpoint", message);
 });
