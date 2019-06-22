@@ -28,7 +28,7 @@ import {
     MatTooltipModule
   ],
   declarations: [
-    // DashboardComponent,
+    DashboardComponent,
     GameComponent,
   ]
 })
