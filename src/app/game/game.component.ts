@@ -12,24 +12,9 @@ import { environment } from '../../environments/environment';
 })
 export class GameComponent implements OnInit {
 
-  @HostListener('mousemove', ['$event'])
-  handleMouseEvent(event) {
-    // tell the browser we're handling this mouse event
-    event.preventDefault();
-    event.stopPropagation();
-
-    let x = Math.floor((event.clientX - this.boardOffsetX) * this.scaleX);
-    let y = event.clientY - this.boardOffsetY;
-
-    if (this.humanPlay) {
-      this.moveOpponent(x, y)
-    }
-  }
-
   constructor(private _socket: SocketService) { }
 
   public canvas: ElementRef<HTMLCanvasElement>;
-
   public puck: Disc = new Disc();
   public controller: Disc = new Disc();
   public controllerTwo: Disc = new Disc();
@@ -190,30 +175,12 @@ export class GameComponent implements OnInit {
   };
 
   // Run game functions
-  updateGame() {
+  updateGame(): void {
 
+    // Clear table
     this.clearCanvas()
 
-    // Collect Scores
-    this._socket.onMessage("scores-change").subscribe((msg: any) => {
-      this.robotScore = msg.robot_score;
-      this.opponentScore = msg.opponent_score;
-    });
-
-    // Draw & contain puck
-    this._socket.onMessage("state-change").subscribe((msg: any) => {
-      this.puck.x = msg.puck[0];
-      this.puck.y = msg.puck[1];
-      this.controller.x = msg.robot[0];
-      this.controller.y = msg.robot[1];
-
-      if (!this.humanPlay) {
-        this.controllerTwo.x = msg.opponent[0];
-        this.controllerTwo.y = msg.opponent[1];
-      }
-
-    });
-
+    // Draw objects
     this.draw(this.puck);
     this.draw(this.controller);
     this.draw(this.controllerTwo);
@@ -224,14 +191,15 @@ export class GameComponent implements OnInit {
   };
 
   // Mouse events
-  moveOpponent(x: number, y: number) {
+  moveOpponent(x: number, y: number): void {
     this.controllerTwo.x = x;
     this.controllerTwo.y = y;
     this.draw(this.controllerTwo);
     this.setOpponentStatePosition()
   }
 
-  setOpponentStatePosition() {
+  // Set human opponen position
+  setOpponentStatePosition(): void {
     let endpoint = environment.apiUrl + '/api/opponent-move';
     fetch(endpoint,
       {
