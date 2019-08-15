@@ -5,7 +5,6 @@
   "scripts": {
     "ng": "ng",
     "server": "node server.js --nouse-idle-notification --max-old-space-size=8192",
-    "start": "ng serve",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
