@@ -1,30 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { environment } from '../../environments/environment';
 
-import * as socketIo from 'socket.io-client';
+import { Socket } from 'ngx-socket-io';
+import { merge } from 'rxjs';
+import { element } from 'protractor';
 
 @Injectable()
 export class SocketService {
-    private socket;
-
-    public initSocket(): void {
-        this.socket = socketIo(environment.socketURL);
+    $events = this.socket.fromEvent<any>('event');
+    $scores = this.socket.fromEvent<any>('scores');
+    $state = this.socket.fromEvent<any>('state');
+    $save = this.socket.fromEvent<any>('save');
+    
+    constructor(private socket: Socket) {
     }
 
-    public send(message: any): void {
-        this.socket.emit('message', message);
-    }
-
-    public onMessage(channel: string): Observable<any> {
-        return new Observable<any>(observer => {
-            this.socket.on(channel, (data: any) => observer.next(data));
-        });
-    }
-
-    public onEvent(event: any): Observable<any> {
-        return new Observable<any>(observer => {
-            this.socket.on(event, () => observer.next());
-        });
-    }
 }

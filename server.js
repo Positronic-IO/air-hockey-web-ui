@@ -24,13 +24,13 @@ app.get('/', (req, res) => {
 });
 
 // Human moving controller
-app.post('/api/opponent-move', (req, res) => {
+app.post('/api/opponent', (req, res) => {
     bot = req.body;
     redis.set('new-opponent-location', JSON.stringify(bot));
     res.status(200).send({});
 });
 
-const server = app.listen(port, () => console.log('Listening on port http://localhost:' + port));
+const server = app.listen(port, () => console.log(`Listening on port http://localhost:${port}`));
 
 // ############## Socket.io stuff ##############
 const io = socketio.listen(server);
@@ -44,16 +44,15 @@ positionSub.subscribe("position-update");
 positionSub.on("message", (channel, message) => {
 
     redis.get("components", (err, resp) => {
-        let data = JSON.parse(resp);
-
-        let state = {
+        const data = JSON.parse(resp);
+        const state = {
             "puck": data.puck.location,
             "robot": data.robot.location,
             "opponent": data.opponent.location,
         };
 
         // console.log(state)
-        io.emit("state-change", state)
+        io.emit("state", state)
     });
 });
 
@@ -62,7 +61,7 @@ scoreSub.subscribe("score-update");
 scoreSub.on("message", (channel, message) => {
 
     redis.get("scores", (err, resp) => {
-        io.emit("scores-change", JSON.parse(resp));
+        io.emit("scores", JSON.parse(resp));
     });
 
 });
@@ -70,5 +69,5 @@ scoreSub.on("message", (channel, message) => {
 // Update Checkpoint
 checkpointSub.subscribe("save-checkpoint");
 checkpointSub.on("message", (channel, message) => {
-    io.emit("save-checkpoint", message);
+    io.emit("save", message);
 });

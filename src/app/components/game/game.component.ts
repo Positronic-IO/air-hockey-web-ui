@@ -1,7 +1,7 @@
 import { Component, ViewChild, ElementRef, OnInit, HostListener } from '@angular/core';
-import { Disc } from '../shared/models/disc.model';
-import { SocketService } from '../services/socket.service';
-import { environment } from '../../environments/environment';
+import { Disc } from '../../models/disc.model';
+import { SocketService } from '../../services/socket.service';
+import { ConfigService } from '../../services/config.service';
 
 
 @Component({
@@ -14,24 +14,24 @@ export class GameComponent implements OnInit {
 
   constructor(private _socket: SocketService) { }
 
-  public canvas: ElementRef<HTMLCanvasElement>;
-  public puck: Disc = new Disc();
-  public controller: Disc = new Disc();
-  public controllerTwo: Disc = new Disc();
-  public boardWidth: number;
-  public boardHeight: number;
-  public board: any;
-  public boardContext: any;
-  public robotScore: number;
-  public opponentScore: number;
-  public humanPlay: boolean;
-  public boardOffsetX: number;
-  public boardOffsetY: number;
-  public scaleX: number;
-  public scaleY: number;
-  public robotCheckpoint: number;
-  public opponentCheckpoint: number;
-  public init: boolean;
+  canvas: ElementRef<HTMLCanvasElement>;
+  puck: Disc = new Disc();
+  controller: Disc = new Disc();
+  controllerTwo: Disc = new Disc();
+  boardWidth: number;
+  boardHeight: number;
+  board: any;
+  boardContext: any;
+  robotScore: number;
+  opponentScore: number;
+  humanPlay: boolean;
+  boardOffsetX: number;
+  boardOffsetY: number;
+  scaleX: number;
+  scaleY: number;
+  robotCheckpoint: number;
+  opponentCheckpoint: number;
+  init: boolean;
 
   @HostListener('mousemove', ['$event'])
   handleMouseEvent(event) {
@@ -39,8 +39,8 @@ export class GameComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
 
-    let x = Math.floor((event.clientX - this.boardOffsetX) * this.scaleX);
-    let y = Math.floor((event.clientY - this.boardOffsetY) * this.scaleY);
+    const x = Math.floor((event.clientX - this.boardOffsetX) * this.scaleX);
+    const y = Math.floor((event.clientY - this.boardOffsetY) * this.scaleY);
 
     if (this.humanPlay) {
       this.moveOpponent(x, y)
@@ -58,7 +58,7 @@ export class GameComponent implements OnInit {
     const boardCenterX = Math.round(this.boardWidth / 2);
     const boardCenterY = Math.round(this.boardHeight / 2);
 
-    var boardBound = this.board.getBoundingClientRect();
+    const boardBound = this.board.getBoundingClientRect();
     this.boardOffsetX = boardBound.left;
     this.boardOffsetY = boardBound.top;
 
@@ -105,23 +105,15 @@ export class GameComponent implements OnInit {
     this.humanPlay = false;
 
     // Start socket subscriptions
-    this.startSocket();
+    this.subscribeSocket();
 
     // Game loop
     this.updateGame();
-
   }
 
-  startSocket(): void {
-    // Load things
-    this._socket.initSocket();
-    this._socket.onEvent("connect")
-      .subscribe(() => {
-        console.log('Websockets enabled.');
-      });
-
+  subscribeSocket(): void {
     // Checkpoint timesteps
-    this._socket.onMessage("save-checkpoint").subscribe((msg: any) => {
+    this._socket.$save.subscribe((msg: any) => {
       this.init = false;
       msg = JSON.parse(msg);
       if (msg == "robot") {
@@ -133,13 +125,13 @@ export class GameComponent implements OnInit {
     });
 
     // Collect Scores
-    this._socket.onMessage("scores-change").subscribe((msg: any) => {
+    this._socket.$scores.subscribe((msg: any) => {
       this.robotScore = msg.robot_score;
       this.opponentScore = msg.opponent_score;
     });
 
     // Draw & contain puck
-    this._socket.onMessage("state-change").subscribe((msg: any) => {
+    this._socket.$state.subscribe((msg: any) => {
       this.puck.x = msg.puck[0];
       this.puck.y = msg.puck[1];
       this.controller.x = msg.robot[0];
@@ -164,11 +156,6 @@ export class GameComponent implements OnInit {
   };
 
   draw(obj: Disc): void {
-    // this.boardContext.shadowColor = 'rgba(50, 50, 50, 0.25)';
-    // this.boardContext.shadowOffsetX = 0;
-    // this.boardContext.shadowOffsetY = 3;
-    // boardContext.shadowBlur = 6;
-
     this.boardContext.beginPath();
     this.boardContext.arc(obj.x, obj.y, obj.radius, 0, 2 * Math.PI, false);
     this.boardContext.fillStyle = obj.color;
@@ -188,7 +175,6 @@ export class GameComponent implements OnInit {
 
     // Loop
     requestAnimationFrame(this.updateGame.bind(this));
-
   };
 
   // Mouse events
@@ -201,7 +187,7 @@ export class GameComponent implements OnInit {
 
   // Set human opponen position
   setOpponentStatePosition(): void {
-    let endpoint = environment.apiUrl + '/api/opponent-move';
+    let endpoint = `${ConfigService.apiUrl}/api/opponent`;
     fetch(endpoint,
       {
         body: JSON.stringify({
