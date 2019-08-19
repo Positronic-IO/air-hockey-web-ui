@@ -32,6 +32,9 @@ export class GameComponent implements OnInit {
   robotCheckpoint: number;
   opponentCheckpoint: number;
   init: boolean;
+  robotCumulativeScore: number = 0;
+  opponentCumulativeScore: number = 0;
+
 
   @HostListener('mousemove', ['$event'])
   handleMouseEvent(event) {
@@ -112,22 +115,21 @@ export class GameComponent implements OnInit {
   }
 
   subscribeSocket(): void {
-    // Checkpoint timesteps
-    this._socket.$save.subscribe((msg: any) => {
-      this.init = false;
-      msg = JSON.parse(msg);
-      if (msg == "robot") {
-        this.robotCheckpoint = Date.now()
-      }
-      if (msg == "opponent") {
-        this.opponentCheckpoint = Date.now()
-      }
-    });
-
     // Collect Scores
     this._socket.$scores.subscribe((msg: any) => {
+      let prevRobotScore = this.robotScore;
+      let prevOpponentScore = this.opponentScore;
+
       this.robotScore = msg.robot_score;
       this.opponentScore = msg.opponent_score;
+
+      // Update cumulative scores for this session
+      if ((this.robotScore % 10 == 0) && (this.robotScore > prevRobotScore)) {
+        this.robotCumulativeScore++
+      }
+      if ((this.opponentScore % 10 == 0) && (this.opponentScore > prevOpponentScore)) {
+        this.opponentCumulativeScore++
+      }
     });
 
     // Draw & contain puck
@@ -143,6 +145,7 @@ export class GameComponent implements OnInit {
       }
 
     });
+
 
   };
 
@@ -164,7 +167,6 @@ export class GameComponent implements OnInit {
 
   // Run game functions
   updateGame(): void {
-
     // Clear table
     this.clearCanvas()
 
