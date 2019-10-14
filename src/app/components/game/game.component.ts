@@ -32,8 +32,8 @@ export class GameComponent implements OnInit {
   robotCheckpoint: number;
   opponentCheckpoint: number;
   init: boolean;
-  robotCumulativeScore: number = 0;
-  opponentCumulativeScore: number = 0;
+  robotCumulativeWins: number = 0;
+  opponentCumulativeWins: number = 0;
 
 
   @HostListener('mousemove', ['$event'])
@@ -125,10 +125,10 @@ export class GameComponent implements OnInit {
 
       // Update cumulative scores for this session
       if ((this.robotScore % 10 == 0) && (this.robotScore > prevRobotScore)) {
-        this.robotCumulativeScore++
+        this.robotCumulativeWins++
       }
       if ((this.opponentScore % 10 == 0) && (this.opponentScore > prevOpponentScore)) {
-        this.opponentCumulativeScore++
+        this.opponentCumulativeWins++
       }
     });
 
