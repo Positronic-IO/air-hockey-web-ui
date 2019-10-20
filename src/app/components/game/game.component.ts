@@ -81,7 +81,7 @@ export class GameComponent implements OnInit {
     this.puck.x = this.puck.startingPosX;
     this.puck.y = this.puck.startingPosY;
     this.puck.radius = 15;
-    this.puck.color = '#000000';
+    this.puck.color = '#33af0a';
 
     // Add controller & adjust settings
     this.controller.color = '#2132CC';
@@ -92,7 +92,7 @@ export class GameComponent implements OnInit {
     this.controller.y = this.controller.startingPosY
 
     // Add controller two
-    this.controllerTwo.color = '#2132CC';
+    this.controllerTwo.color = '#dd3e1a';
     this.controllerTwo.radius = 20;
     this.controllerTwo.startingPosX = (this.boardWidth - 155);
     this.controllerTwo.startingPosY = this.puck.startingPosY;
